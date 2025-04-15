@@ -16,5 +16,5 @@
 - `moment`：用于处理日期和时间。
 - `cli-table3`：用于在命令行中生成格式化表格。
 
-![cex](trade/20250415123935.jpg)
+![cex](https://github.com/Cafexss/Blockchain-Notes/blob/main/trade/20250415123935.jpg)
 
