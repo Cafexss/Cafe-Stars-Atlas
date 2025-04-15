@@ -66,6 +66,7 @@ const EXCHANGES = {
     name: 'OKX',
     baseUrl: 'https://www.okx.com/api/v5/market/candles',
     symbolListUrl: 'https://www.okx.com/api/v5/public/instruments',
+    tickerUrl: 'https://www.okx.com/api/v5/market/ticker',  // 添加实时行情API
     getSymbols: async (filterUSDT = true) => {
       try {
         const response = await axios.get(EXCHANGES.okx.symbolListUrl, {
@@ -95,6 +96,9 @@ const EXCHANGES = {
               limit: 15,
             },
           });
+          if (symbol === 'PARTI-USDT') { // 只打印一个示例数据
+            console.log('OKX K-line data structure:', JSON.stringify(response.data.data[0], null, 2));
+          }
           return response.data.data;
         } catch (error) {
           if (i === retries - 1) {
@@ -102,6 +106,32 @@ const EXCHANGES = {
             return null;
           }
           await new Promise(resolve => setTimeout(resolve, 5000)); // 等待 5 秒后重试
+        }
+      }
+    },
+    getCurrentPrice: async (symbol, retries = 3) => {
+      for (let i = 0; i < retries; i++) {
+        try {
+          const response = await axios.get(EXCHANGES.okx.tickerUrl, {
+            params: {
+              instId: symbol
+            }
+          });
+          return parseFloat(response.data.data[0].last);
+        } catch (error) {
+          if (error.response && error.response.status === 429) {
+            // 如果是速率限制错误，等待一段时间后重试
+            const waitTime = Math.pow(2, i) * 1000; // 指数退避
+            console.log(`Rate limited, waiting ${waitTime/1000} seconds before retry...`);
+            await new Promise(resolve => setTimeout(resolve, waitTime));
+            if (i === retries - 1) {
+              console.error(`Failed to fetch current price for ${symbol} after ${retries} attempts`);
+              return null;
+            }
+          } else {
+            console.error(`Failed to fetch current price for ${symbol}:`, error.message);
+            return null;
+          }
         }
       }
     }
@@ -126,7 +156,7 @@ async function findTopPerformingTokens(exchange) {
   console.log(`\n📊 ${EXCHANGES[exchange].name}上架代币总数: ${symbols.length} 个\n`);
 
   const results = [];
-  const batchSize = 50;
+  const batchSize = 10; // 减小批量大小
   const batches = chunkArray(symbols, batchSize);
 
   for (let i = 0; i < batches.length; i++) {
@@ -136,28 +166,39 @@ async function findTopPerformingTokens(exchange) {
       ).toFixed(1)}%)`
     );
     const batch = batches[i];
-    const promises = batch.map(symbol =>
-      EXCHANGES[exchange].getKlines(symbol, exchange === 'binance' ? '1d' : '1D', elevenDaysAgo).then(klines => {
-        if (klines && klines.length > 0) {
-          const firstKline = klines[0];
-          const lastKline = klines[klines.length - 1];
-          const openPrice = parseFloat(firstKline[1]);
-          const closePrice = parseFloat(lastKline[4]);
-          const priceChange = calculatePercentageChange(openPrice, closePrice);
+    const promises = batch.map(async symbol => {
+      const klines = await EXCHANGES[exchange].getKlines(symbol, exchange === 'binance' ? '1d' : '1D', elevenDaysAgo);
+      if (klines && klines.length > 0) {
+        const sortedKlines = exchange === 'binance' ? klines : [...klines].reverse();
+        const firstKline = sortedKlines[0];
+        const openPrice = parseFloat(firstKline[1]);
+        
+        // 获取实时价格
+        const currentPrice = exchange === 'binance' 
+          ? parseFloat(sortedKlines[sortedKlines.length - 1][4])
+          : await EXCHANGES[exchange].getCurrentPrice(symbol);
+        
+        if (currentPrice) {
+          const priceChange = calculatePercentageChange(openPrice, currentPrice);
           if (priceChange >= 50) {
             return {
               symbol,
               priceChange,
-              currentPrice: closePrice,
+              currentPrice,
               openPrice
             };
           }
         }
-        return null;
-      })
-    );
+      }
+      return null;
+    });
     const batchResults = (await Promise.all(promises)).filter(result => result);
     results.push(...batchResults);
+    
+    // 在每批处理完成后添加延迟
+    if (i < batches.length - 1) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
   }
 
   // 按涨幅降序排序
