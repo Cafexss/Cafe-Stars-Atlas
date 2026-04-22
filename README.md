@@ -1,6 +1,6 @@
 # ☕ Cafe's Stars-Atlas Notes 📜💎
 
-Welcome to my blockchain notes repo! 🚀
+Welcome to my  notes repo! 🚀
 
 ## 📂 Repository Structure / 仓库结构
 
