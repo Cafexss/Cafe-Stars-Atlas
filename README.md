@@ -1,4 +1,4 @@
-# ☕ Cafe's Blockchain Notes 📜💎
+# ☕ Cafe's Stars-Atlas Notes 📜💎
 
 Welcome to my blockchain notes repo! 🚀
 
