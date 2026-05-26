@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unusual Whales 全量实操手册 - 最终修复版</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --claude-bg: #f9f9f8;
+            --claude-sidebar: #f0f0ee;
+            --claude-text: #1d1d1b;
+            --claude-accent: #d97706;
+            --claude-border: #e5e5e2;
+            --claude-hover: #e5e5e2;
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            background-color: var(--claude-bg);
+            color: var(--claude-text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .sidebar {
+            background-color: var(--claude-sidebar);
+            border-right: 1px solid var(--claude-border);
+            width: 280px;
+        }
+        .content-card {
+            background-color: white;
+            border: 1px solid var(--claude-border);
+            border-radius: 12px;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .term-badge {
+            background-color: #fef3c7;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: 600;
+            font-size: 0.85em;
+            color: #b45309;
+        }
+        .nav-link {
+            display: block;
+            padding: 10px 16px;
+            border-radius: 8px;
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            color: #4b5563;
+            text-decoration: none;
+        }
+        .nav-link:hover {
+            background-color: var(--claude-hover);
+            color: var(--claude-text);
+        }
+        h1, h2, h3, h4 {
+            color: #111827;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        .step-number {
+            background-color: var(--claude-accent);
+            color: white;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        .pro-tip {
+            background-color: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+            border-radius: 0 8px 8px 0;
+        }
+        .code-block {
+            background-color: #1f2937;
+            color: #f3f4f6;
+            padding: 1.25rem;
+            border-radius: 8px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            margin: 1rem 0;
+        }
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .status-green { background-color: #10b981; }
+        .status-yellow { background-color: #f59e0b; }
+        .status-red { background-color: #ef4444; }
+        section { scroll-margin-top: 2rem; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="sidebar flex-shrink-0 flex flex-col p-6 overflow-y-auto hidden lg:flex">
+        <div class="mb-10">
+            <h2 class="text-2xl font-bold flex items-center tracking-tight">
+                <span class="mr-3">🐋</span> Unusual Whales
+            </h2>
+            <p class="text-xs text-gray-500 mt-2 font-medium uppercase tracking-widest">全量手册 (最终版)</p>
+        </div>
+        <nav class="flex-1 space-y-1">
+            <div class="text-xs font-bold text-gray-400 mb-2 px-4 uppercase tracking-wider">入门指南</div>
+            <a href="#welcome" class="nav-link">平台愿景与核心理念</a>
+            <a href="#quickstart" class="nav-link">快速上手教程</a>
+            
+            <div class="text-xs font-bold text-gray-400 mt-6 mb-2 px-4 uppercase tracking-wider">核心功能解析</div>
+            <a href="#options-flow" class="nav-link">Options Flow 深度解读</a>
+            <a href="#flow-status" class="nav-link">Flow Status 实时机制</a>
+            <a href="#dark-pool" class="nav-link">Dark Pool 暗池交易</a>
+            <a href="#alerts" class="nav-link">Alerts 警报系统实战</a>
+            
+            <div class="text-xs font-bold text-gray-400 mt-6 mb-2 px-4 uppercase tracking-wider">高级工具集</div>
+            <a href="#congress" class="nav-link">国会交易追踪</a>
+            <a href="#calculator" class="nav-link">期权策略利润计算器</a>
+            <a href="#mobile" class="nav-link">移动端 App 操作细节</a>
+            
+            <div class="text-xs font-bold text-gray-400 mt-6 mb-2 px-4 uppercase tracking-wider">术语与参考</div>
+            <a href="#glossary" class="nav-link">核心术语 A-Z</a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto bg-white lg:bg-transparent">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            
+            <!-- Section: Welcome -->
+            <section id="welcome">
+                <div class="flex items-center space-x-2 text-amber-600 mb-4">
+                    <span class="text-sm font-bold uppercase tracking-widest">Introduction</span>
+                </div>
+                <h1 class="text-4xl font-extrabold mb-8">平台愿景与核心理念</h1>
+                <div class="content-card shadow-sm">
+                    <p class="text-lg leading-relaxed text-gray-700">
+                        Unusual Whales 致力于通过提供实时、透明的期权流、暗池和国会交易数据，为散户投资者赋能。我们的核心目标是追踪“大鲸鱼”——即那些拥有海量资金、可能影响市场走向的机构和内部人士，让散户不再盲目交易。
+                    </p>
+                </div>
+            </section>
+
+            <!-- Section: Quickstart -->
+            <section id="quickstart">
+                <div class="flex items-center space-x-2 text-amber-600 mb-4">
+                    <span class="text-sm font-bold uppercase tracking-widest">Guide</span>
+                </div>
+                <h2 class="text-3xl font-bold mb-8">快速上手教程</h2>
+                <div class="content-card">
+                    <div class="space-y-6">
+                        <div class="flex items-start">
+                            <span class="step-number">1</span>
+                            <div>
+                                <h4 class="font-bold">注册与订阅</h4>
+                                <p class="text-sm text-gray-600">访问官网完成注册。建议选择包含 LIVE 数据的计划，以获得最及时的推送。</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="step-number">2</span>
+                            <div>
+                                <h4 class="font-bold">关联 Discord</h4>
+                                <p class="text-sm text-gray-600">在 Settings 中关联 Discord 账号，加入订阅者专属频道，获取机器人实时警报。</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="step-number">3</span>
+                            <div>
+                                <h4 class="font-bold">配置第一个过滤器</h4>
+                                <p class="text-sm text-gray-600">进入 Flow 页面，设置 <code>Min Premium = $50k</code>，开始观察大资金流向。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Options Flow -->
+            <section id="options-flow">
+                <div class="flex items-center space-x-2 text-amber-600 mb-4">
+                    <span class="text-sm font-bold uppercase tracking-widest">Deep Dive</span>
+                </div>
+                <h2 class="text-3xl font-bold mb-8">Options Flow 深度解读</h2>
+                <div class="content-card">
+                    <h3 class="text-xl mb-4">关键字段详解：</h3>
+                    <div class="overflow-x-auto mb-6">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="p-3 border">字段</th>
+                                    <th class="p-3 border">操作意义</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="p-3 border font-bold">Side</td>
+                                    <td class="p-3 border">🛍️ (Buy/Ask) 代表主动买入；🦴 (Sell/Bid) 代表主动卖出。</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 border font-bold">Premium</td>
+                                    <td class="p-3 border">总金额。关注单笔 > $100k 的“鲸鱼”订单。</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 border font-bold">Vol/OI</td>
+                                    <td class="p-3 border">如果成交量 (Vol) 远大于未平仓 (OI)，说明有大户在建立新头寸。</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="pro-tip">
+                        <strong>实战建议：</strong> 寻找那些在 Ask 侧成交、且成交量大于 OI 的末日期权，这往往是短期爆发的信号。
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Flow Status -->
+            <section id="flow-status">
+                <div class="flex items-center space-x-2 text-amber-600 mb-4">
+                    <span class="text-sm font-bold uppercase tracking-widest">Performance</span>
+                </div>
+                <h2 class="text-3xl font-bold mb-8">Flow Status 实时机制</h2>
+                <div class="content-card">
+                    <div class="space-y-4">
+                        <div class="p-4 bg-green-50 rounded-lg flex items-center border border-green-200">
+                            <span class="status-dot status-green"></span>
+                            <div><strong>绿色：</strong> 数据 100% 实时推送。这是最理想的过滤状态。</div>
+                        </div>
+                        <div class="p-4 bg-yellow-50 rounded-lg flex items-center border border-yellow-200">
+                            <span class="status-dot status-yellow"></span>
+                            <div><strong>黄色：</strong> 绝大部分数据实时，但在高峰期可能有几秒延迟。</div>
+                        </div>
+                        <div class="p-4 bg-red-50 rounded-lg flex items-center border border-red-200">
+                            <span class="status-dot status-red"></span>
+                            <div><strong>红色：</strong> 过滤太宽，数据量过载，无法实时推送所有条目。</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Dark Pool -->
+            <section id="dark-pool">
+                <div class="flex items-center space-x-2 text-amber-600 mb-4">
+                    <span class="text-sm font-bold uppercase tracking-widest">Institutional</span>
+                </div>
+                <h2 class="text-3xl font-bold mb-8">Dark Pool 暗池交易</h2>
+                <div class="content-card">
+                    <p class="text-gray-700 mb-4">暗池是机构进行大宗交易而不影响市场即时报价的地方。Unusual Whales 通过以下方式解析暗池：</p>
+                    <ul class="list-disc ml-6 space-y-2 text-gray-600">
+                        <li><strong>AA BUY (+🐂)：</strong> 高于 Ask 价的买入，极度看多。</li>
+                        <li><strong>BB SELL (-🐻)：</strong> 低于 Bid 价的卖出，极度看空。</li>
+                        <li><strong>Signature Trades：</strong> 暗池中的巨量单一订单，通常标志着支撑位或压力位的形成。</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Section: Alerts -->
+            <section id="alerts">
+                <div class="flex items-center space-x-2 text-amber-600 mb-4">
+                    <span class="text-sm font-bold uppercase tracking-widest">Automation</span>
+                </div>
+                <h2 class="text-3xl font-bold mb-8">Alerts 警报系统实战</h2>
+                <div class="content-card">
+                    <p class="text-gray-700 mb-4">警报是算法自动筛选的“高潜力”信号。每个警报卡片都包含：</p>
+                    <div class="code-block">
+                        TSLA $800C | Expiry: Friday | Premium: $2.5M | Vol/OI: 5.2x
+                    </div>
+                    <p class="mt-4 text-sm text-gray-600">
+                        <strong>实战操作：</strong> 收到警报后，立即点击详情查看该合约的历史成交量分布，确认大户是否还在场内。
+                    </p>
+                </div>
+            </section>
+
+            <!-- Section: Congress -->
+            <section id="congress">
+                <div class="flex items-center space-x-2 text-amber-600 mb-4">
+                    <span class="text-sm font-bold uppercase tracking-widest">Advanced</span>
+                </div>
+                <h2 class="text-3xl font-bold mb-8">🏛️ 国会交易追踪</h2>
+                <div class="content-card">
+                    <h4 class="font-bold">操作指南：</h4>
+                    <p class="text-gray-700 mb-4">在 "Congress" 标签页下，你可以按议员姓名或行业筛选。关注那些胜率极高的议员（如 Nancy Pelosi）的最新披露。</p>
+                    <div class="pro-tip">
+                        <strong>技巧：</strong> 关注那些“非本行业委员会”议员跨行业买入的行为，这通常意味着更强的内部信心。
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Calculator -->
+            <section id="calculator">
+                <div class="flex items-center space-x-2 text-amber-600 mb-4">
+                    <span class="text-sm font-bold uppercase tracking-widest">Advanced</span>
+                </div>
+                <h2 class="text-3xl font-bold mb-8">🧮 期权策略利润计算器</h2>
+                <div class="content-card">
+                    <p class="text-gray-700 mb-4">在 Flow 页面点击任意交易旁的计算器图标，即可模拟盈亏：</p>
+                    <ul class="list-decimal ml-6 space-y-2 text-gray-600">
+                        <li><strong>可视化：</strong> 查看随时间和股价变化的盈亏热力图。</li>
+                        <li><strong>IV 模拟：</strong> 手动调整隐含波动率，看财报后 IV Crush 会如何影响你的头寸。</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Section: Mobile App -->
+            <section id="mobile">
+                <div class="flex items-center space-x-2 text-amber-600 mb-4">
+                    <span class="text-sm font-bold uppercase tracking-widest">Advanced</span>
+                </div>
+                <h2 class="text-3xl font-bold mb-8">📱 移动端 App 操作细节</h2>
+                <div class="content-card">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="p-4 border rounded-lg">
+                            <h4 class="font-bold">自定义推送</h4>
+                            <p class="text-sm text-gray-600">在 App 的 "Your Hunt" 中设置特定的 Premium 阈值，只接收你关心的重磅警报。</p>
+                        </div>
+                        <div class="p-4 border rounded-lg">
+                            <h4 class="font-bold">实时图表</h4>
+                            <p class="text-sm text-gray-600">点击任何 Flow 条目即可在手机上查看该合约的实时报价和分时图。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Glossary -->
+            <section id="glossary">
+                <div class="flex items-center space-x-2 text-amber-600 mb-4">
+                    <span class="text-sm font-bold uppercase tracking-widest">Reference</span>
+                </div>
+                <h2 class="text-3xl font-bold mb-8">核心术语 A-Z</h2>
+                <div class="content-card">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                        <div><strong>Golden Sweep：</strong> 极高额且在 Ask 侧成交的横扫单。</div>
+                        <div><strong>OI (Open Interest)：</strong> 未平仓合约数，代表市场的总头寸。</div>
+                        <div><strong>Strike Price：</strong> 行权价。</div>
+                        <div><strong>Premium：</strong> 权利金（单价*数量*100）。</div>
+                    </div>
+                </div>
+            </section>
+
+            <footer class="mt-20 pt-8 border-t border-gray-200 text-center text-gray-400 text-sm">
+                <p>© 2026 Unusual Whales 深度中文实操手册 - 最终完整修复版</p>
+            </footer>
+
+        </div>
+    </main>
+
+</body>
+</html>
